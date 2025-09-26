@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import KpiCard from '../ui/KpiCard';
 import ChartCard from '../ui/ChartCard';
 
@@ -38,6 +39,21 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ theme }) => {
     const [primaryColor, setPrimaryColor] = useState('#2563eb');
     
     const pageSize = 8;
+
+    const containerVariants = {
+      hidden: { opacity: 1 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.1
+        }
+      }
+    };
+
+    const itemVariants = {
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 }
+    };
 
     useEffect(() => {
         setTransactions(generateTransactions());
@@ -133,18 +149,40 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ theme }) => {
     };
 
     return (
-        <div className="px-6 py-4 space-y-6">
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <KpiCard title="Total Revenue" value="$124,560" change="+6.2%" changeType="increase" description="Since last month" icon="dollar-sign" gradient="bg-gradient-to-tr from-blue-500 to-cyan-400" />
-                <KpiCard title="Monthly Recurring" value="$34,200" change="+2.1%" changeType="increase" description="Grow subscription base" icon="repeat" gradient="bg-gradient-to-tr from-indigo-500 to-purple-500" />
-                <KpiCard title="New Customers" value="1,254" change="+8.3%" changeType="increase" description="Last 30 days" icon="users" gradient="bg-gradient-to-tr from-emerald-500 to-green-400" />
-                <KpiCard title="Conversion Rate" value="4.8%" change="-0.2%" changeType="decrease" description="Of website visits" icon="percent" gradient="bg-gradient-to-tr from-yellow-500 to-orange-400" />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <motion.div
+            className="px-6 py-4 space-y-6"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
+             <motion.div
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                variants={containerVariants}
+             >
+                <motion.div variants={itemVariants}>
+                    <KpiCard title="Total Revenue" value="$124,560" change="+6.2%" changeType="increase" description="Since last month" icon="dollar-sign" gradient="bg-gradient-to-tr from-blue-500 to-cyan-400" />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                    <KpiCard title="Monthly Recurring" value="$34,200" change="+2.1%" changeType="increase" description="Grow subscription base" icon="repeat" gradient="bg-gradient-to-tr from-indigo-500 to-purple-500" />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                    <KpiCard title="New Customers" value="1,254" change="+8.3%" changeType="increase" description="Last 30 days" icon="users" gradient="bg-gradient-to-tr from-emerald-500 to-green-400" />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                    <KpiCard title="Conversion Rate" value="4.8%" change="-0.2%" changeType="decrease" description="Of website visits" icon="percent" gradient="bg-gradient-to-tr from-yellow-500 to-orange-400" />
+                </motion.div>
+            </motion.div>
+            <motion.div
+                className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+                variants={itemVariants}
+            >
                 <ChartCard title="Revenue Trend" chartId="revenueLineChart" chartConfig={revenueChartConfig} className="lg:col-span-2" />
                 <ChartCard title="Sales Channels" chartId="salesDonutChart" chartConfig={salesChannelChartConfig} />
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+            </motion.div>
+            <motion.div
+                className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow"
+                variants={itemVariants}
+            >
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold">Recent Transactions</h3>
                     <div className="flex items-center gap-2">
@@ -181,8 +219,8 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ theme }) => {
                         <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-2 py-1 border rounded-md text-sm disabled:opacity-50">Next</button>
                     </div>
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

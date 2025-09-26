@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../ui/Icon';
 
 interface NavItemProps {
@@ -8,16 +9,26 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({ to, children }) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      `sidebar-link block px-4 py-2 hover:text-primary ${
-        isActive ? 'text-primary dark:text-primary font-semibold' : 'font-normal'
-      }`
-    }
+  <motion.div
+    whileHover={{ scale: 1.05, x: 5 }}
+    whileTap={{ scale: 0.95 }}
+    className="rounded-lg relative"
   >
-    {children}
-  </NavLink>
+    <div className="absolute left-0 top-1/2 flex items-center transform -translate-y-1/2 z-10">
+      <div className="w-px h-1.5 bg-primary dark:bg-primary rounded-full mr-1" /> {/* Vertical curve attachment */}
+      <div className="w-5 h-px bg-primary dark:bg-primary rounded-r-full" /> {/* Horizontal with right curve to text */}
+    </div>
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `sidebar-link block pl-7 py-2 transition-colors duration-300 hover:text-primary ${
+          isActive ? 'text-primary dark:text-primary font-bold bg-gray-100 dark:bg-gray-700' : 'font-bold'
+        } rounded-lg`
+      }
+    >
+      {children}
+    </NavLink>
+  </motion.div>
 );
 
 interface AccordionProps {
@@ -25,12 +36,22 @@ interface AccordionProps {
   icon: string;
   children: React.ReactNode;
   isCollapsed: boolean;
-  activeAccordion: string | null;
-  setActiveAccordion: (title: string | null) => void;
+  activeAccordions: string[];
+  setActiveAccordions: (accordions: string[]) => void;
   onToggle: () => void;
+  isMounted: boolean;
 }
 
-const Accordion: React.FC<AccordionProps> = ({ title, icon, children, isCollapsed, activeAccordion, setActiveAccordion, onToggle }) => {
+const Accordion: React.FC<AccordionProps> = ({
+  title,
+  icon,
+  children,
+  isCollapsed,
+  activeAccordions,
+  setActiveAccordions,
+  onToggle,
+  isMounted,
+}) => {
   const location = useLocation();
 
   const hasActiveChild = useMemo(() => {
@@ -48,40 +69,63 @@ const Accordion: React.FC<AccordionProps> = ({ title, icon, children, isCollapse
     return active;
   }, [location.pathname, children]);
 
-  React.useEffect(() => {
-    if (hasActiveChild) {
-      setActiveAccordion(title);
-    }
-  }, [hasActiveChild, title, setActiveAccordion]);
-
-  const isOpen = activeAccordion === title;
+  const isOpen = activeAccordions.includes(title);
 
   const handleToggle = () => {
     if (isCollapsed) {
       onToggle();
     } else {
-      setActiveAccordion(isOpen ? null : title);
+      setActiveAccordions(prev => {
+        if (isOpen) {
+          return prev.filter(acc => acc !== title);
+        } else {
+          let newAccordions = [...prev, title];
+          if (newAccordions.length > 2) {
+            newAccordions = newAccordions.slice(-2); // Keep last 2, remove oldest
+          }
+          return newAccordions;
+        }
+      });
     }
   };
 
   return (
     <>
-      <button
+      <motion.button
         onClick={handleToggle}
-        className={`w-full flex items-center px-6 py-2 font-semibold uppercase text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+        whileTap={{ scale: 0.98 }}
+        className={`w-full flex items-center px-6 py-2 font-bold uppercase text-gray-700 dark:text-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 ${
+          isCollapsed ? 'justify-center' : 'justify-between'
+        }`}
       >
         <span className={`flex items-center ${isCollapsed ? '' : 'space-x-2'}`}>
-          <Icon name={icon} className="w-4 h-4" />
+          <Icon name={icon} className={isCollapsed ? 'w-8 h-8' : 'w-5 h-5'} />
           {!isCollapsed && <span>{title}</span>}
         </span>
         {!isCollapsed && (
-          <Icon
-            name="chevron-down"
-            className={`w-4 h-4 transition-transform duration-200 ease-in-out ${isOpen ? 'rotate-180' : ''}`}
-          />
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          >
+            <Icon name="chevron-down" className="w-4 h-4" />
+          </motion.div>
         )}
-      </button>
-      {isOpen && !isCollapsed && <div className="ml-10 space-y-1">{children}</div>}
+      </motion.button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && !isCollapsed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="ml-8 space-y-1 overflow-hidden relative pt-2"
+          >
+            <div className="absolute left-0 top-0 h-full w-px bg-primary dark:bg-primary" />
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
@@ -93,23 +137,29 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onSettingsClick, onToggle }) => {
-  const [activeAccordion, setActiveAccordion] = useState<string | null>('Dashboards');
+  const [activeAccordions, setActiveAccordions] = useState<string[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const commonAccordionProps = {
     isCollapsed,
-    activeAccordion,
-    setActiveAccordion,
+    activeAccordions,
+    setActiveAccordions,
     onToggle,
+    isMounted,
   };
 
   return (
-    <aside className={`fixed top-0 left-0 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between overflow-y-auto z-50 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
+    <aside
+      className={`fixed top-0 left-0 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col justify-between overflow-y-auto z-50 transition-all duration-500 shadow-lg ${
+        isCollapsed ? 'w-20' : 'w-64'
+      }`}
+    >
       <div>
-        <div className={`flex items-center w-full px-6 py-4 ${isCollapsed ? 'justify-center' : 'space-x-2'}`}>
-          <img src="https://img.icons8.com/fluency/48/dashboard-layout.png" className="w-8 h-8 flex-shrink-0" alt="logo" />
-          {!isCollapsed && <span className="text-xl font-bold text-primary dark:text-primary">K-DN</span>}
-        </div>
-        <nav className="mt-2 text-sm select-none">
+        <nav className="text-sm select-none" style={{ paddingTop: '50px' }}>
           <Accordion title="Dashboards" icon="home" {...commonAccordionProps}>
             <NavItem to="/">Sales</NavItem>
             <NavItem to="/project-management">Project Management</NavItem>
@@ -125,13 +175,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onSettingsClick, onToggl
             <NavItem to="/auth/forgot-password">Forgot Password</NavItem>
             <NavItem to="/auth/reset-password">Reset Password</NavItem>
           </Accordion>
+          <Accordion title="User Management" icon="users" {...commonAccordionProps}>
+            <NavItem to="/user-management/user-list">User List</NavItem>
+            <NavItem to="/user-management/user-profile">User Profile</NavItem>
+            <NavItem to="/user-management/roles-permissions">Roles & Permissions</NavItem>
+          </Accordion>
         </nav>
       </div>
+
       <div className="p-6">
-        <button onClick={onSettingsClick} className={`w-full flex items-center justify-center bg-primary text-text-on-primary py-2 rounded-lg shadow hover:bg-primary-hover ${isCollapsed ? '' : 'gap-2'}`}>
-          <Icon name="sliders-horizontal" className="w-5 h-5" />
-          {!isCollapsed && <span>Customize</span>}
-        </button>
+        {!isCollapsed && (
+          <motion.button
+            onClick={onSettingsClick}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full flex items-center justify-center bg-primary text-text-on-primary py-2 rounded-lg shadow-md hover:bg-primary-hover gap-2 transition-all duration-300"
+          >
+            <Icon name="sliders-horizontal" className="w-5 h-5" />
+            <span>Customize</span>
+          </motion.button>
+        )}
       </div>
     </aside>
   );

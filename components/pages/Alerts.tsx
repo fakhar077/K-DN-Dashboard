@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 const Alert: React.FC<{ type: 'success' | 'warning' | 'error' | 'info' | 'custom', title: string, message: string }> = ({ type, title, message }) => {
     const [isVisible, setIsVisible] = useState(true);

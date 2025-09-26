@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import Icon from './Icon';
 
 interface KpiCardProps {
@@ -14,7 +15,13 @@ interface KpiCardProps {
 
 const KpiCard: React.FC<KpiCardProps> = ({ title, value, change, changeType, description, icon, gradient }) => {
   return (
-    <div className="kpi-card bg-white dark:bg-gray-800 p-4 rounded-xl shadow flex items-start gap-3 hover:shadow-md transition-shadow">
+    <motion.div
+      className="kpi-card bg-white dark:bg-gray-800 p-4 rounded-xl shadow flex items-start gap-3 hover:shadow-md transition-shadow"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      whileHover={{ scale: 1.02 }}
+    >
       <div className={`p-3 rounded-lg ${gradient} text-white`}>
         <Icon name={icon} className="w-5 h-5" />
       </div>
@@ -26,7 +33,7 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, change, changeType, des
         </div>
         <p className="text-xs text-gray-400 mt-1">{description}</p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

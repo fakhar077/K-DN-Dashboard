@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import Sidebar from './components/layout/Sidebar';
 import SalesDashboard from './components/dashboards/SalesDashboard';
@@ -7,6 +8,9 @@ import ProjectManagementDashboard from './components/dashboards/ProjectManagemen
 import EcommerceDashboard from './components/dashboards/EcommerceDashboard';
 import Alerts from './components/pages/Alerts';
 import Buttons from './components/pages/Buttons';
+import UserList from './components/pages/UserList';
+import UserProfile from './components/pages/UserProfile';
+import RolesPermissions from './components/pages/RolesPermissions';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
@@ -94,12 +98,50 @@ const App: React.FC = () => {
   if (isAuthPage) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-        <Routes>
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/register" element={<Register />} />
-          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-          <Route path="/auth/reset-password" element={<ResetPassword />} />
-        </Routes>
+        <AnimatePresence mode="wait" key={location.pathname}>
+          <Routes location={location}>
+            <Route path="/auth/login" element={
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <Login />
+              </motion.div>
+            } />
+            <Route path="/auth/register" element={
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <Register />
+              </motion.div>
+            } />
+            <Route path="/auth/forgot-password" element={
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <ForgotPassword />
+              </motion.div>
+            } />
+            <Route path="/auth/reset-password" element={
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <ResetPassword />
+              </motion.div>
+            } />
+          </Routes>
+        </AnimatePresence>
       </div>
     );
   }
@@ -115,13 +157,90 @@ const App: React.FC = () => {
           theme={theme}
         />
         <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<SalesDashboard theme={theme} />} />
-            <Route path="/project-management" element={<ProjectManagementDashboard theme={theme} />} />
-            <Route path="/ecommerce" element={<EcommerceDashboard theme={theme} />} />
-            <Route path="/components/alerts" element={<Alerts />} />
-            <Route path="/components/buttons" element={<Buttons />} />
-          </Routes>
+          <AnimatePresence mode="wait" key={location.pathname}>
+            <Routes location={location}>
+            <Route path="/" element={
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <SalesDashboard theme={theme} />
+              </motion.div>
+            } />
+              <Route path="/project-management" element={
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <ProjectManagementDashboard theme={theme} />
+                </motion.div>
+              } />
+              <Route path="/ecommerce" element={
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <EcommerceDashboard theme={theme} />
+                </motion.div>
+              } />
+              <Route path="/components/alerts" element={
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <Alerts />
+                </motion.div>
+              } />
+              <Route path="/components/buttons" element={
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <Buttons />
+                </motion.div>
+              } />
+              <Route path="/user-management/user-list" element={
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <UserList />
+                </motion.div>
+              } />
+              <Route path="/user-management/user-profile" element={
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <UserProfile />
+                </motion.div>
+              } />
+              <Route path="/user-management/roles-permissions" element={
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <RolesPermissions />
+                </motion.div>
+              } />
+            </Routes>
+          </AnimatePresence>
         </main>
       </div>
       <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} onSetTheme={setTheme} onSetThemeName={setThemeName} />

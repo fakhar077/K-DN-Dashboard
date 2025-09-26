@@ -5,13 +5,14 @@ declare const Chart: any;
 
 interface ChartCardProps {
     title: string;
+    description?: string;
     chartId: string;
     chartConfig: any;
     className?: string;
     height?: string;
 }
 
-const ChartCard: React.FC<ChartCardProps> = ({ title, chartId, chartConfig, className, height="160" }) => {
+const ChartCard: React.FC<ChartCardProps> = ({ title, description, chartId, chartConfig, className, height="160" }) => {
     const chartRef = useRef<HTMLCanvasElement>(null);
     const chartInstance = useRef<any>(null);
 
@@ -39,6 +40,7 @@ const ChartCard: React.FC<ChartCardProps> = ({ title, chartId, chartConfig, clas
     return (
         <div className={`bg-white dark:bg-gray-800 p-4 rounded-xl shadow ${className}`}>
             <h4 className="font-semibold mb-2">{title}</h4>
+            {description && <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{description}</p>}
             <canvas id={chartId} ref={chartRef} className="w-full" height={height} aria-label={`${title} chart`}></canvas>
         </div>
     );

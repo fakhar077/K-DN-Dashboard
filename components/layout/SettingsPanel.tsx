@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import Icon from '../ui/Icon';
 
 interface SettingsPanelProps {
@@ -17,29 +18,72 @@ const themeColors = [
 ];
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onSetTheme, onSetThemeName }) => {
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 }
+  };
+
+  const panelVariants = {
+    hidden: { x: '100%', opacity: 0, scale: 0.95 },
+    visible: { x: 0, opacity: 1, scale: 1 },
+    exit: { x: '100%', opacity: 0, scale: 0.95 }
+  };
+
+  const handleLightMode = React.useCallback(() => {
+    onSetTheme('light');
+  }, [onSetTheme]);
+
+  const handleDarkMode = React.useCallback(() => {
+    onSetTheme('dark');
+  }, [onSetTheme]);
+
+  const handleColorSelect = React.useCallback((name: string) => {
+    onSetThemeName(name);
+    window.location.reload();
+  }, [onSetThemeName]);
+
   return (
     <>
-      {/* Overlay */}
-      <div 
-        className={`fixed inset-0 bg-black/30 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={onClose}
-      />
       {/* Panel */}
-      <div className={`fixed top-0 right-0 w-80 h-full bg-white dark:bg-gray-800 shadow-lg p-6 z-50 transition-transform duration-300 ease-in-out ${isOpen ? 'transform translate-x-0' : 'transform translate-x-full'}`}>
+      <motion.div 
+        variants={panelVariants}
+        initial="hidden"
+        animate={isOpen ? "visible" : "exit"}
+        exit="exit"
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="fixed top-0 right-0 w-80 h-full bg-white dark:bg-gray-800 shadow-lg p-6 z-50"
+      >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Settings</h2>
-          <button onClick={onClose}><Icon name="x" className="w-6 h-6" /></button>
+          <motion.button 
+            onClick={onClose}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Icon name="x" className="w-6 h-6" />
+          </motion.button>
         </div>
 
         <div className="mb-6">
           <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Mode</h3>
           <div className="flex gap-4">
-            <button onClick={() => onSetTheme('light')} className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+            <motion.button 
+              onClick={handleLightMode} 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            >
               <Icon name="sun" className="w-4 h-4" /> Light
-            </button>
-            <button onClick={() => onSetTheme('dark')} className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+            </motion.button>
+            <motion.button 
+              onClick={handleDarkMode} 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            >
               <Icon name="moon" className="w-4 h-4" /> Dark
-            </button>
+            </motion.button>
           </div>
         </div>
 
@@ -47,9 +91,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onSetThe
           <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Colors</h3>
           <div className="flex gap-2">
               {themeColors.map(({ name, color }) => (
-                  <button 
+                  <motion.button
                       key={name}
-                      onClick={() => onSetThemeName(name)}
+                      onClick={() => handleColorSelect(name)}
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
                       className="w-8 h-8 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-primary"
                       style={{ backgroundColor: color }}
                       aria-label={`Set theme to ${name}`}
@@ -57,9 +103,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onSetThe
               ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };
 
-export default SettingsPanel;
+export default React.memo(SettingsPanel);
